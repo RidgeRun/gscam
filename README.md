@@ -16,11 +16,7 @@ GStreamer Library Support
 
 gscam supports the following versions of GStreamer
 
-### 0.1.x: _Default_
-
-Install dependencies via `rosdep`.
-
-### 1.0.x: Experimental
+### 1.0.x
 
 #### Dependencies:
  
@@ -45,7 +41,6 @@ sudo apt-get install gstreamer1.0-tools libgstreamer1.0-dev libgstreamer-plugins
 ```
 
 #### Usage:
-* Use the CMake flag `-DGSTREAMER_VERSION_1_x=On` when building
 * See the [Video4Linux2 launchfile example](examples/v4l.launch) for
   an example of the differences in the GStreamer config lines
 
