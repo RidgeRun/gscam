@@ -41,7 +41,6 @@ namespace gscam {
 
     // Appsink configuration
     bool sync_sink_;
-    bool preroll_;
     bool reopen_on_eof_;
     bool use_gst_timestamps_;
 

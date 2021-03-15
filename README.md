@@ -1,22 +1,12 @@
-GSCam [![Build Status](https://travis-ci.org/ros-drivers/gscam.svg?branch=master)](https://travis-ci.org/ros-drivers/gscam)
+RidgeRun's GSCam
+
+Forked from: [GSCam project](https://github.com/ros-drivers/gscam)
 ===========================================================================================================================
 
-This is a ROS package originally developed by the [Brown Robotics
-Lab](http://robotics.cs.brown.edu/) for broadcasting any
-[GStreamer](http://gstreamer.freedesktop.org/)-based video stream via the
-standard [ROS Camera API](http://ros.org/wiki/camera_drivers). This fork has
-several fixes incorporated into it to make it broadcast correct
-`sensor_msgs/Image` messages with proper frames and timestamps. It also allows
-for more ROS-like configuration and more control over the GStreamer interface.
-
-Note that this pacakge can be built both in a rosbuild and catkin workspaces.
-
-GStreamer Library Support
+GStreamer Support
 -------------------------
 
-gscam supports the following versions of GStreamer
-
-### 1.0.x
+GScam supports GStreamer 1.0
 
 #### Dependencies:
  
@@ -25,16 +15,7 @@ gscam supports the following versions of GStreamer
 * libgstreamer-plugins-base1.0-dev 
 * libgstreamer-plugins-good1.0-dev
 
-Ubuntu Install:
-
-##### 12.04
-
-```sh
-sudo add-apt-repository ppa:gstreamer-developers/ppa
-sudo apt-get install gstreamer1.0-tools libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev libgstreamer-plugins-good1.0-dev
-```
-
-##### 14.04
+Ubuntu Installation:
 
 ```sh
 sudo apt-get install gstreamer1.0-tools libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev libgstreamer-plugins-good1.0-dev
@@ -45,7 +26,7 @@ sudo apt-get install gstreamer1.0-tools libgstreamer1.0-dev libgstreamer-plugins
   an example of the differences in the GStreamer config lines
 
 #### Notes:
-* This has been tested with `v4l2src`
+* This has been tested with `v4l2src` and [GStreamer Daemon](https://developer.ridgerun.com/wiki/index.php?title=GStreamer_Daemon_-_ROS) 
 
 ROS API (stable)
 ----------------
@@ -72,10 +53,6 @@ This can be run as both a node and a nodelet.
 * `~reopen_on_eof`: Re-open the stream if it ends (EOF).
 * `~sync_sink`: Synchronize the app sink (sometimes setting this to `false` can resolve problems with sub-par framerates).
 
-C++ API (unstable)
-------------------
-
-The gscam c++ library can be used, but it is not guaranteed to be stable. 
 
 Examples
 --------
@@ -83,6 +60,7 @@ Examples
 See example launchfiles and configs in the examples directory. Currently there
 are examples for:
 
+* [GStreamer Daemon](examples/gstd-demo.launch): ROS + GstD Demo
 * [Video4Linux2](examples/v4l.launch): Standard
   [video4linux](http://en.wikipedia.org/wiki/Video4Linux)-based cameras like
   USB webcams.

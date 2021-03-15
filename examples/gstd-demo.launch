@@ -1,0 +1,13 @@
+<launch>
+  <!-- This launchfile should bring up a node that broadcasts a ros image
+       transport on /gstd/camera/image_raw, video coming from a GStreamer Daemon process -->
+
+  <node ns="gstd" name="gscam_driver_v4l" pkg="gscam" type="gscam" output="screen">
+    <param name="camera_name" value="default"/>
+    <param name="camera_info_url" value="package://gscam/examples/uncalibrated_parameters.ini"/>
+    <param name="gscam_config" value="shmsrc socket-path=/tmp/blah ! video/x-raw,format=YUY2,color-matrix=sdtv,chroma-site=mpeg2,width=320,height=240,framerate=1/1 ! videoconvert "/>
+    <param name="frame_id" value="/gstd_frame"/>
+    <param name="sync_sink" value="true"/>
+  </node>
+
+</launch>
