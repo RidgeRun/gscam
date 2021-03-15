@@ -4,7 +4,6 @@
 #include <sys/ipc.h>
 #include <sys/shm.h>
 
-
 #include <iostream>
 extern "C"{
 #include <gst/gst.h>
@@ -15,7 +14,6 @@ extern "C"{
 
 #include <image_transport/image_transport.h>
 #include <camera_info_manager/camera_info_manager.h>
-
 
 #include <sensor_msgs/Image.h>
 #include <sensor_msgs/CompressedImage.h>
@@ -71,7 +69,6 @@ namespace gscam {
 
     // Get additional gscam configuration
     nh_private_.param("sync_sink", sync_sink_, true);
-    nh_private_.param("preroll", preroll_, false);
     nh_private_.param("use_gst_timestamps", use_gst_timestamps_, false);
 
     nh_private_.param("reopen_on_eof", reopen_on_eof_, false);
@@ -111,11 +108,11 @@ namespace gscam {
   {
     if(!gst_is_initialized()) {
       // Initialize gstreamer pipeline
-      ROS_DEBUG_STREAM( "Initializing gstreamer..." );
+      ROS_DEBUG_STREAM( "Initializing GStreamer..." );
       gst_init(0,0);
     }
 
-    ROS_DEBUG_STREAM( "Gstreamer Version: " << gst_version_string() );
+    ROS_DEBUG_STREAM( "GStreamer Version: " << gst_version_string() );
 
     GError *error = 0; // Assignment to zero is a gst requirement
 
@@ -129,7 +126,6 @@ namespace gscam {
     sink_ = gst_element_factory_make("appsink",NULL);
     GstCaps * caps = gst_app_sink_get_caps(GST_APP_SINK(sink_));
 
-#if (GST_VERSION_MAJOR == 1)
     // http://gstreamer.freedesktop.org/data/doc/gstreamer/head/pwg/html/section-types-definitions.html
     if (image_encoding_ == sensor_msgs::image_encodings::RGB8) {
         caps = gst_caps_new_simple( "video/x-raw", 
@@ -142,15 +138,6 @@ namespace gscam {
     } else if (image_encoding_ == "jpeg") {
         caps = gst_caps_new_simple("image/jpeg", NULL, NULL);
     }
-#else
-    if (image_encoding_ == sensor_msgs::image_encodings::RGB8) {
-        caps = gst_caps_new_simple( "video/x-raw-rgb", NULL,NULL); 
-    } else if (image_encoding_ == sensor_msgs::image_encodings::MONO8) {
-        caps = gst_caps_new_simple("video/x-raw-gray", NULL, NULL);
-    } else if (image_encoding_ == "jpeg") {
-        caps = gst_caps_new_simple("image/jpeg", NULL, NULL);
-    }
-#endif
 
     gst_app_sink_set_caps(GST_APP_SINK(sink_), caps);
     gst_caps_unref(caps);
@@ -231,30 +218,7 @@ namespace gscam {
 
   void GSCam::publish_stream()
   {
-    ROS_INFO_STREAM("Publishing stream...");
-
-    // Pre-roll camera if needed
-    if (preroll_) {
-      ROS_DEBUG("Performing preroll...");
-
-      //The PAUSE, PLAY, PAUSE, PLAY cycle is to ensure proper pre-roll
-      //I am told this is needed and am erring on the side of caution.
-      gst_element_set_state(pipeline_, GST_STATE_PLAYING);
-      if (gst_element_get_state(pipeline_, NULL, NULL, -1) == GST_STATE_CHANGE_FAILURE) {
-        ROS_ERROR("Failed to PLAY during preroll.");
-        return;
-      } else {
-        ROS_DEBUG("Stream is PLAYING in preroll.");
-      }
-
-      gst_element_set_state(pipeline_, GST_STATE_PAUSED);
-      if (gst_element_get_state(pipeline_, NULL, NULL, -1) == GST_STATE_CHANGE_FAILURE) {
-        ROS_ERROR("Failed to PAUSE.");
-        return;
-      } else {
-        ROS_INFO("Stream is PAUSED in preroll.");
-      }
-    }
+    ROS_INFO_STREAM("Publishing stream ...");
 
     if(gst_element_set_state(pipeline_, GST_STATE_PLAYING) == GST_STATE_CHANGE_FAILURE) {
       ROS_ERROR("Could not start stream!");
@@ -267,8 +231,7 @@ namespace gscam {
     {
       // This should block until a new frame is awake, this way, we'll run at the
       // actual capture framerate of the device.
-      // ROS_DEBUG("Getting data...");
-#if (GST_VERSION_MAJOR == 1)
+      ROS_DEBUG("Getting data...");
       GstSample* sample = gst_app_sink_pull_sample(GST_APP_SINK(sink_));
       if(!sample) {
         ROS_ERROR("Could not get gstreamer sample.");
@@ -281,25 +244,8 @@ namespace gscam {
       gst_memory_map(memory, &info, GST_MAP_READ);
       gsize &buf_size = info.size;
       guint8* &buf_data = info.data;
-#else
-      GstBuffer* buf = gst_app_sink_pull_buffer(GST_APP_SINK(sink_));
-      guint &buf_size = buf->size;
-      guint8* &buf_data = buf->data;
-#endif
+
       GstClockTime bt = gst_element_get_base_time(pipeline_);
-      // ROS_INFO("New buffer: timestamp %.6f %lu %lu %.3f",
-      //         GST_TIME_AS_USECONDS(buf->timestamp+bt)/1e6+time_offset_, buf->timestamp, bt, time_offset_);
-
-
-#if 0
-      GstFormat fmt = GST_FORMAT_TIME;
-      gint64 current = -1;
-
-       Query the current position of the stream
-      if (gst_element_query_position(pipeline_, &fmt, &current)) {
-          ROS_INFO_STREAM("Position "<<current);
-      }
-#endif
 
       // Stop on end of stream
       if (!buf) {
@@ -307,15 +253,12 @@ namespace gscam {
         break;
       }
 
-      // ROS_DEBUG("Got data.");
+      ROS_DEBUG("Got data.");
 
       // Get the image width and height
       GstPad* pad = gst_element_get_static_pad(sink_, "sink");
-#if (GST_VERSION_MAJOR == 1)
       const GstCaps *caps = gst_pad_get_current_caps(pad);
-#else
-      const GstCaps *caps = gst_pad_get_negotiated_caps(pad);
-#endif
+
       GstStructure *structure = gst_caps_get_structure(caps,0);
       gst_structure_get_int(structure,"width",&width_);
       gst_structure_get_int(structure,"height",&height_);
@@ -325,15 +268,11 @@ namespace gscam {
       sensor_msgs::CameraInfoPtr cinfo;
       cinfo.reset(new sensor_msgs::CameraInfo(cur_cinfo));
       if (use_gst_timestamps_) {
-#if (GST_VERSION_MAJOR == 1)
           cinfo->header.stamp = ros::Time(GST_TIME_AS_USECONDS(buf->pts+bt)/1e6+time_offset_);
-#else
-          cinfo->header.stamp = ros::Time(GST_TIME_AS_USECONDS(buf->timestamp+bt)/1e6+time_offset_);
-#endif
       } else {
           cinfo->header.stamp = ros::Time::now();
       }
-      // ROS_INFO("Image time stamp: %.3f",cinfo->header.stamp.toSec());
+      ROS_DEBUG("Image time stamp: %.3f",cinfo->header.stamp.toSec());
       cinfo->header.frame_id = frame_id_;
       if (image_encoding_ == "jpeg") {
           sensor_msgs::CompressedImagePtr img(new sensor_msgs::CompressedImage());
@@ -388,10 +327,8 @@ namespace gscam {
 
       // Release the buffer
       if(buf) {
-#if (GST_VERSION_MAJOR == 1)
         gst_memory_unmap(memory, &info);
         gst_memory_unref(memory);
-#endif
         gst_buffer_unref(buf);
       }
 
@@ -438,16 +375,4 @@ namespace gscam {
     }
 
   }
-
-  // Example callbacks for appsink
-  // TODO: enable callback-based capture
-  void gst_eos_cb(GstAppSink *appsink, gpointer user_data ) {
-  }
-  GstFlowReturn gst_new_preroll_cb(GstAppSink *appsink, gpointer user_data ) {
-    return GST_FLOW_OK;
-  }
-  GstFlowReturn gst_new_asample_cb(GstAppSink *appsink, gpointer user_data ) {
-    return GST_FLOW_OK;
-  }
-
 }
