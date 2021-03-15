@@ -1,12 +1,11 @@
 <package>
   <name>gscam</name>
-  <version>1.0.1</version>
+  <version>1.1.0</version>
   <description>
     A ROS camera driver that uses gstreamer to connect to
     devices such as webcams.
   </description>
-  <maintainer email="jbo@jhu.edu">Jonathan Bohren</maintainer>
-  <maintainer email="ros-orphaned-packages@googlegroups.com">ROS Orphaned Package Maintainers</maintainer>
+  <maintainer email="support@ridgerun.com">RidgeRun's support</maintainer>
   <license>BSD</license>
 
   <author email="jbo@jhu.edu">Jonathan Bohren</author>

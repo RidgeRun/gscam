@@ -2,6 +2,12 @@
 Changelog for package gscam
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.1.0 (2021-03-15)
+------------------
+* RidgeRun's GScam custom fork first modifications
+* Remove Gst-0.10 code and dependency
+* Add GstD Demo launch file
+
 1.0.1 (2018-09-06)
 ------------------
 * Merge pull request `#52 <https://github.com/ros-drivers/gscam/issues/52>`_ from k-okada/add_travis
