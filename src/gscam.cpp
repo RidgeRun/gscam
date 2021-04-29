@@ -290,10 +290,15 @@ namespace gscam {
           cinfo_pub_.publish(cinfo);
       } else {
           // Complain if the returned buffer is smaller than we expect
-          const unsigned int expected_frame_size =
-              image_encoding_ == sensor_msgs::image_encodings::RGB8
-              ? width_ * height_ * 3
-              : width_ * height_;
+          unsigned int expected_frame_size = 0;
+
+          if (image_encoding_ == sensor_msgs::image_encodings::RGB8) {
+            expected_frame_size = width_ * height_ * 3;
+          } else if (image_encoding_ == sensor_msgs::image_encodings::RGBA8) {
+            expected_frame_size = width_ * height_ * 4;
+          } else {
+            expected_frame_size = width_ * height_;
+          }
 
           if (buf_size < expected_frame_size) {
               ROS_WARN_STREAM( "GStreamer image buffer underflow: Expected frame to be "
