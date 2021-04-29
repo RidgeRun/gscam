@@ -323,6 +323,8 @@ namespace gscam {
           // we can free the buffer allocated by gstreamer
           if (image_encoding_ == sensor_msgs::image_encodings::RGB8) {
               img->step = width_ * 3;
+          } else if (image_encoding_ == sensor_msgs::image_encodings::RGBA8) {
+              img->step = width_ * 4;
           } else {
               img->step = width_;
           }
