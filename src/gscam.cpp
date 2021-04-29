@@ -132,6 +132,10 @@ namespace gscam {
         caps = gst_caps_new_simple( "video/x-raw", 
             "format", G_TYPE_STRING, "RGB",
             NULL); 
+    } else if (image_encoding_ == sensor_msgs::image_encodings::RGBA8) {
+        caps = gst_caps_new_simple( "video/x-raw", 
+            "format", G_TYPE_STRING, "RGBA",
+            NULL); 
     } else if (image_encoding_ == sensor_msgs::image_encodings::MONO8) {
         caps = gst_caps_new_simple( "video/x-raw", 
             "format", G_TYPE_STRING, "GRAY8",
