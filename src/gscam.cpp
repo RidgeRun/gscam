@@ -80,6 +80,7 @@ namespace gscam {
     // Get the image encoding
     nh_private_.param("image_encoding", image_encoding_, sensor_msgs::image_encodings::RGB8);
     if (image_encoding_ != sensor_msgs::image_encodings::RGB8 &&
+        image_encoding_ != sensor_msgs::image_encodings::RGBA8 &&
         image_encoding_ != sensor_msgs::image_encodings::MONO8 && 
         image_encoding_ != "jpeg") {
       ROS_FATAL_STREAM("Unsupported image encoding: " + image_encoding_);
