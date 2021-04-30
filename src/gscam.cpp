@@ -279,6 +279,10 @@ namespace gscam {
       }
       ROS_DEBUG("Image time stamp: %.3f",cinfo->header.stamp.toSec());
       cinfo->header.frame_id = frame_id_;
+
+      // Define the number of channels for each format
+      int RGB_CH = 3, RGBA_CH = 4;
+
       if (image_encoding_ == "jpeg") {
           sensor_msgs::CompressedImagePtr img(new sensor_msgs::CompressedImage());
           img->header = cinfo->header;
@@ -293,9 +297,9 @@ namespace gscam {
           unsigned int expected_frame_size = 0;
 
           if (image_encoding_ == sensor_msgs::image_encodings::RGB8) {
-            expected_frame_size = width_ * height_ * 3;
+            expected_frame_size = width_ * height_ * RGB_CH;
           } else if (image_encoding_ == sensor_msgs::image_encodings::RGBA8) {
-            expected_frame_size = width_ * height_ * 4;
+            expected_frame_size = width_ * height_ * RGBA_CH;
           } else {
             expected_frame_size = width_ * height_;
           }
@@ -322,9 +326,9 @@ namespace gscam {
           // Since we're publishing shared pointers, we need to copy the image so
           // we can free the buffer allocated by gstreamer
           if (image_encoding_ == sensor_msgs::image_encodings::RGB8) {
-              img->step = width_ * 3;
+              img->step = width_ * RGB_CH;
           } else if (image_encoding_ == sensor_msgs::image_encodings::RGBA8) {
-              img->step = width_ * 4;
+              img->step = width_ * RGBA_CH;
           } else {
               img->step = width_;
           }
